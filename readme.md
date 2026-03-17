@@ -40,7 +40,7 @@ curl --location 'http://127.0.0.1:8080/' \
     --header 'Content-Type: application/json' \
     --header 'Accept: application/json'
 ```
-Obs.: O header API_KEY é opcional.
+Obs.: O header API_KEY é opcional. Para executar testes com o limite default usando IP é preciso remover o header API_KEY.
 
 #### 5 - Executar testes
 `docker compose run --rm api go test . -v`
