@@ -1,0 +1,11 @@
+services:
+  redis:
+    image: redis:8.6.1
+    ports:
+      - "6379:6379"
+  api:
+    build: .
+    volumes:
+      - ".:/app"
+    ports:
+      - "8080:8080"
