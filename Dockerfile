@@ -4,4 +4,4 @@ RUN mkdir "/app"
 
 WORKDIR /app
 
-CMD go mod tidy && go run /app/cmd/server/main.go
+CMD go run /app/cmd/server/main.go
