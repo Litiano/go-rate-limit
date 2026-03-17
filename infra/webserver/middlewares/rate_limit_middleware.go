@@ -11,20 +11,20 @@ import (
 
 type RateLimitMiddleware struct {
 	limiter ratelimiter.RateLimiterInterface
+	jwtAuth *jwtauth.JWTAuth
 }
 
-func NewRateLimitMiddleware(limiter ratelimiter.RateLimiterInterface) *RateLimitMiddleware {
-	return &RateLimitMiddleware{limiter: limiter}
+func NewRateLimitMiddleware(limiter ratelimiter.RateLimiterInterface, auth *jwtauth.JWTAuth) *RateLimitMiddleware {
+	return &RateLimitMiddleware{limiter: limiter, jwtAuth: auth}
 }
 
 func (rl *RateLimitMiddleware) RateLimitMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
-		jwtAuth := request.Context().Value("jwt").(*jwtauth.JWTAuth)
 		subject := strings.Split(request.RemoteAddr, ":")[0]
 
 		token := request.Header.Get("API_KEY")
 		if token != "" {
-			data, err := jwtAuth.Decode(token)
+			data, err := rl.jwtAuth.Decode(token)
 			if err != nil {
 				response.WriteHeader(http.StatusUnauthorized)
 				response.Write([]byte(err.Error()))

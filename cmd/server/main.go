@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -37,7 +36,7 @@ func main() {
 
 	authHandler := handlers.NewAuthHandler(config.TokenAuthKey, config.JwtExpiresIn)
 	redisRateLimite := ratelimiter.NewRedisRateLimiter(rdb, config.DefaultRateLimit, time.Duration(config.BanTime)*time.Second)
-	rateLimiter := middlewares.NewRateLimitMiddleware(redisRateLimite)
+	rateLimiter := middlewares.NewRateLimitMiddleware(redisRateLimite, config.TokenAuthKey)
 
 	router := chi.NewRouter()
 	router.Use(middleware.RequestID)
@@ -48,13 +47,7 @@ func main() {
 	router.Use(rateLimiter.RateLimitMiddleware)
 
 	router.Group(func(router chi.Router) {
-		router.Get("/", func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": true,
-			})
-		})
+		router.Get("/", handlers.IndexHandler)
 	})
 
 	// Open routes
@@ -64,6 +57,6 @@ func main() {
 
 	err = http.ListenAndServe(fmt.Sprintf(":%d", config.AppPort), router)
 	if err != nil {
-		return
+		panic(err)
 	}
 }
